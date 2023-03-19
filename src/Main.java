@@ -53,14 +53,16 @@ public class Main {
                 "\nWelcome to my pet adoption system! " +
                         "I hope that you can find a pet to bring home and care " +
                         "for! If you want to file an adoption application, please " +
-                        "check out the available pets beforehand and remember your pet's name.");
+                        "check out the available pets' profiles beforehand and remember your pet's name.");
 
         do {
+            printLineDivisor();
+
             // Display menu and receive user selection
-            System.out.println("\nMenu" +
-                    "\n\n1) View Available Pets" +
+            System.out.println("Menu" +
+                    "\n\n1) View Available Pets Profiles" +
                     "\n2) File Adoption Application" +
-                    "\n3) Check Adoption Application Receipt" +
+                    "\n3) View Adoption Application Receipt" +
                     "\n4) Input Adoption Data (Reserved For Staff ONLY)" +
                     "\n5) Exit\n");
             System.out.print("Please enter your selection: ");
@@ -69,11 +71,14 @@ public class Main {
 
             switch (menuSelection) {
                 case "1":
-                    // View Available Pets
+
+                    printLineDivisor();
+
+                    // View Available Pets Profiles
                     String returnToMenuSelection;
 
                     // Print pet profiles
-                    System.out.println("\nPet Profiles");
+                    System.out.println("View Available Pets Profiles");
                     printPetProfiles();
 
                     // Return user to main menu when they press 0
@@ -91,6 +96,10 @@ public class Main {
                     break;
                 case "2":
                     // Submit Adoption Application
+
+                    printLineDivisor();
+                    System.out.println("Submit Adoption Application");
+
                     User user = new User();
 
                     // Display introduction message
@@ -122,22 +131,20 @@ public class Main {
 
                         Pet pet = getPetData(petName);
 
-                        System.out.println("pet: " + getPetData(petName));
-
-
                         if (pet != null) {
 
                             saveApplicationData(pet, user);
                             removePetFromAvailablePets(petName);
 
                             System.out.println("\nYou have completed the pet adoption application. " +
-                                    "Thank you so much for submitting it! We will review the application" +
-                                    " and email you the results within 5 business days. " +
-                                    "\nYou will now return to the main menu...");
-                            Thread.sleep(2000);
+                                    "Thank you so much for submitting it!");
+                            System.out.println("\nWe will review the application and email you the results within 5 business days.");
+                            System.out.println("You will now return to the main menu...");
+
+                            Thread.sleep(2400);
                             break;
                         } else {
-                            System.out.println("\nUnfortunately, the pet doesn't exist.");
+                            System.out.println("\nUnfortunately, the pet doesn't exist. I recommend revisiting available pets profiles to confirm the pet's name.");
                             System.out.println("\nIf you would like to try another pet's name, input 1");
                             System.out.println("If you would like to return to the main menu, input 2.");
 
@@ -167,8 +174,11 @@ public class Main {
 
                     break;
                 case "3":
-                    // Check Adoption Application Receipt
+                    // View Adoption Application Receipt
                     String returnToMenuSelection2;
+
+                    printLineDivisor();
+                    System.out.println("View Adoption Application Receipt");
 
                     System.out.println("To show you your application receipt, we will need your name.");
 
@@ -230,7 +240,9 @@ public class Main {
 
                     break;
                 case "4":
-                    // Input Adoption Data (Reserved for Staff)
+                    // Input Adoption Data (Reserved For Staff ONLY)
+                    printLineDivisor();
+                    System.out.println("Input Adoption Data (Reserved For Staff ONLY)");
 
                     Pet currentPet = new Pet();
 
@@ -260,6 +272,10 @@ public class Main {
 
                     break;
                 case "5":
+                    // Exit the program
+                    printLineDivisor();
+                    System.out.println("Exit the Program");
+
                     printConcludingMessage();
                     break;
                 default:
@@ -275,7 +291,7 @@ public class Main {
      *
      * @param applicationReceipt This is used to get data that should be included in the receipt.
      */
-    public static void printApplicationReceipt(ApplicationReceipt applicationReceipt) {
+    private static void printApplicationReceipt(ApplicationReceipt applicationReceipt) {
 
         Map<User, List<Pet>> receiptMap = applicationReceipt.getReceiptMap();
 
@@ -312,7 +328,7 @@ public class Main {
     /**
      * This method prints out each pet's formatted profile by using data from the availablePets txt file
      */
-    public static void printPetProfiles() {
+    private static void printPetProfiles() {
 
         File file = new File(AVAILABLE_PETS_FILE);
 
@@ -355,14 +371,14 @@ public class Main {
      * @param pet  The pet whose data is to be saved in the file.
      * @param user The user whose data is to be saved in the file.
      */
-    public static void saveApplicationData(Pet pet, User user) {
+    private static void saveApplicationData(Pet pet, User user) {
 
         try {
             FileWriter fw = new FileWriter(APPLICATION_DATA_FILE, true);
             PrintWriter printWriter = new PrintWriter(fw);
 
             // Append the user and pet data to the txt file
-            printWriter.println(user.getName() + ", " + user.getEmail() + ", " + user.getAge()
+            printWriter.println(user.getName() + ", " + user.getEmail() + ", " + user.getAge() + ", "
                     + pet.getName() + ", " + pet.getAge() + ", " + pet.getType().name());
 
             // Close the file
@@ -379,7 +395,7 @@ public class Main {
      *
      * @param pet The pet whose data is to be saved in the file.
      */
-    public static void saveAvailablePet(Pet pet) {
+    private static void saveAvailablePet(Pet pet) {
 
         try {
             FileWriter fw = new FileWriter(AVAILABLE_PETS_FILE, true);
@@ -402,7 +418,7 @@ public class Main {
      *
      * @param petName The name of the pet whose data should be removed.
      */
-    public static void removePetFromAvailablePets(String petName) {
+    private static void removePetFromAvailablePets(String petName) {
 
         try {
             // Read the pet data from the file and each pet to the ArrayList
@@ -442,7 +458,7 @@ public class Main {
      * @param petName The name of the pet whose data should be returned.
      * @return Returns a Pet object based on the pet's name if the pet exists, and returns null if it doesn't.
      */
-    public static Pet getPetData(String petName) {
+    private static Pet getPetData(String petName) {
 
         try {
             File file = new File(AVAILABLE_PETS_FILE);
@@ -454,7 +470,7 @@ public class Main {
                 String[] petData = line.split(", ");
 
                 // Check if the pet name matches
-                if (petData[0].equals(petName)) {
+                if (petData[0].equalsIgnoreCase(petName)) {
                     Pet pet = new Pet();
                     pet.setName(petData[0]);
                     pet.setAge(petData[1]);
@@ -479,7 +495,7 @@ public class Main {
      * @param userName The name of the user whose data should be returned.
      * @return Returns a User object based on the user's name if the user exists, and returns null if it doesn't.
      */
-    public static User getUserData(String userName) {
+    private static User getUserData(String userName) {
 
         try {
             File file = new File(APPLICATION_DATA_FILE);
@@ -491,7 +507,7 @@ public class Main {
                 String[] userData = line.split(", ");
 
                 // Check if the pet name matches
-                if (userData[0].equals(userName)) {
+                if (userData[0].equalsIgnoreCase(userName)) {
                     User user = new User();
                     user.setName(userData[0]);
                     user.setEmail(userData[1]);
@@ -517,7 +533,7 @@ public class Main {
      * @param userName The name of the user whose data should be returned.
      * @return Returns an ApplicationReceipt object receipt that holds data for the application receipt.
      */
-    public static ApplicationReceipt getApplicationReceiptData(String userName) {
+    private static ApplicationReceipt getApplicationReceiptData(String userName) {
 
         Map<User, List<Pet>> receiptDataMap = new HashMap<>();
         User user = new User();
@@ -534,7 +550,7 @@ public class Main {
                 String[] applicationData = line.split(", ");
 
                 // Check if the user's name matches
-                if (applicationData[0].equals(userName)) {
+                if (applicationData[0].equalsIgnoreCase(userName)) {
                     // Set the data
                     user.setName(applicationData[0]);
                     user.setEmail(applicationData[1]);
@@ -657,6 +673,13 @@ public class Main {
         // Print error message
         System.out.println("\n\nYour menu selection was invalid. Please try again!");
         Thread.sleep(1500);
+    }
+
+    /**
+     * This method prints a line divisor to separate text.
+     */
+    private static void printLineDivisor(){
+        System.out.println("\n----------------------------------------------------\n");
     }
 
 
