@@ -24,6 +24,30 @@ public class Main {
 
         System.out.print(CLEAR_CONSOLE); // Clear console
 
+        File availablePetsFile = new File(AVAILABLE_PETS_FILE);
+        if (!availablePetsFile.exists()) {
+            try {
+                availablePetsFile.createNewFile();
+            } catch (IOException e) {
+                System.out.println("There was an error creating a necessary file. Please contact a staff member for tech support.");
+                System.out.println("The program will exit now.");
+
+                System.exit(0);
+            }
+        }
+
+        File applicationDataFile = new File(APPLICATION_DATA_FILE);
+        if (!applicationDataFile.exists()) {
+            try {
+                applicationDataFile.createNewFile();
+            } catch (IOException e) {
+                System.out.println("There was an error creating a necessary file. Please contact a staff member for tech support.");
+                System.out.println("The program will exit now.");
+
+                System.exit(0);
+            }
+        }
+
         // Display welcoming message
         System.out.println(
                 "\nWelcome to my pet adoption system! " +
@@ -623,8 +647,6 @@ public class Main {
         // Print concluding message
         System.out.println("\n\nThank you for using my pet adoption system. You will now exit the program. Have a great day!");
 
-        // Save progress and exit program
-//            currentPet.savePetProgress();
         System.exit(0);
     }
 
