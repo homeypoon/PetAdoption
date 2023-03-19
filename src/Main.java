@@ -1,4 +1,4 @@
-import java.util.Scanner;
+import java.util.*;
 import java.io.*;
 
 /*
@@ -10,11 +10,10 @@ import java.io.*;
  */
 
 public class Main {
-    static final int INPUT_TYPE_NAME = 0, INPUT_TYPE_AGE = 1,
-            INPUT_TYPE_EMAIL = 2, INPUT_TYPE_PET_TYPE = 3;
+    static final int INPUT_TYPE_DUPLICABLE_NAME = 0, INPUT_TYPE_NOT_DUPLICABLE_NAME = 1, INPUT_TYPE_AGE = 2,
+            INPUT_TYPE_EMAIL = 3, INPUT_TYPE_PET_TYPE = 4;
     static final String AVAILABLE_PETS_FILE = "availablePets.txt",
             APPLICATION_DATA_FILE = "applicationData.txt";
-
     static PetType[] petTypes = PetType.values();
 
     public static void main(String[] args) throws InterruptedException {
@@ -37,8 +36,8 @@ public class Main {
             System.out.println("\nMenu" +
                     "\n\n1) View Available Pets" +
                     "\n2) File Adoption Application" +
-                    "\n3) Check Adoption Application" +
-                    "\n4) Input Adoption Data (Reserved for Staff)" +
+                    "\n3) Check Adoption Application Receipt" +
+                    "\n4) Input Adoption Data (Reserved For Staff ONLY)" +
                     "\n5) Exit\n");
             System.out.print("Please enter your selection: ");
 
@@ -47,10 +46,23 @@ public class Main {
             switch (menuSelection) {
                 case "1":
                     // View Available Pets
+                    String returnToMenuSelection;
 
-                    System.out.println("Pet Profiles");
+                    // Print pet profiles
+                    System.out.println("\nPet Profiles");
                     printPetProfiles();
 
+                    // Return user to main menu when they press 0
+                    do {
+                        System.out.print("\nType 0 when you're ready to return to the main menu: ");
+                        returnToMenuSelection = keyboard.nextLine().strip();
+
+                        System.out.println("Invalid input! Please try again!");
+
+                    } while (!returnToMenuSelection.equals("0"));
+
+                    System.out.println("\nYou will now return to the main menu...");
+                    Thread.sleep(800);
 
                     break;
                 case "2":
@@ -59,34 +71,40 @@ public class Main {
 
                     // Display introduction message
                     System.out.println(
-                            "\nI'm glad you want to file for pet adoption and provide a home to a pet!" +
-                                    " Before we begin the adoption application filing process, " +
-                                    "I have to ensure that you are of legal age to adopt a pet.");
+                            "\nI'm glad you want to file for pet adoption and provide a home to a pet!");
+                    System.out.println("Before we begin the adoption application filing process, I have" +
+                            " to ensure that you are of legal age to adopt a pet.");
                     String userAge = getApplicationData("\nPlease input your age: ", INPUT_TYPE_AGE);
 
                     if (Integer.parseInt(userAge) >= 18) {
                         user.setAge(userAge);
                     } else {
                         System.out.println("\nUnfortunately, you are required to be at " +
-                                "least 18 years old to adopt a pet. Feel free to explore the pet options, though!");
+                                "least 18 years old to adopt a pet. Feel free to explore the pet profiles, though!");
                         System.out.println("You will now return to the main menu...");
+                        Thread.sleep(1200);
                         continue;
                     }
 
                     System.out.println("Great! You meet the age requirements for pet adoption. You can" +
-                            " now proceed to fill out information about yourself and the pet");
+                            " now proceed to fill out information about yourself and the pet you would like to adopt.");
 
-                    user.setName(getApplicationData("\nPlease input your name: ", INPUT_TYPE_NAME));
+                    user.setName(getApplicationData("\nPlease input your name: ", INPUT_TYPE_DUPLICABLE_NAME));
                     user.setEmail(getApplicationData("\nPlease input your email address: ", INPUT_TYPE_EMAIL));
 
                     do {
-                        String petName = getApplicationData("\nPlease input the name of the pet you would like to adopt: ", INPUT_TYPE_NAME);
+
+                        String petName = getApplicationData("\nPlease input the name of the pet you would like to adopt: ", INPUT_TYPE_DUPLICABLE_NAME);
 
                         Pet pet = getPetData(petName);
+
+                        System.out.println("pet: " + getPetData(petName));
+
 
                         if (pet != null) {
 
                             saveApplicationData(pet, user);
+                            removePetFromAvailablePets(petName);
 
                             System.out.println("\nYou have completed the pet adoption application. " +
                                     "Thank you so much for submitting it! We will review the application" +
@@ -96,18 +114,28 @@ public class Main {
                             break;
                         } else {
                             System.out.println("\nUnfortunately, the pet doesn't exist.");
-                            System.out.println("If you would like to try another pet's name, input 1");
+                            System.out.println("\nIf you would like to try another pet's name, input 1");
                             System.out.println("If you would like to return to the main menu, input 2.");
 
-                            System.out.print("Please input your selection: ");
-                            String userSelection = keyboard.nextLine();
+                            String userSelection;
 
-                            if (userSelection.equals("1")) {
-                                continue;
-                            } else if (userSelection.equals("2")) {
+                            do {
+                                System.out.print("\nPlease input your selection: ");
+
+                                userSelection = keyboard.nextLine();
+
+                                if (userSelection.equals("1")) {
+                                    break;
+                                } else if (userSelection.equals("2")) {
+                                    break;
+                                } else {
+                                    System.out.println("Invalid input! Please try again!");
+                                }
+                            } while (true);
+
+                            // Return to main menu if user selects 2
+                            if (userSelection.equals("2")) {
                                 break;
-                            } else {
-                                System.out.println("Invalid input! Please try again!");
                             }
                         }
 
@@ -115,8 +143,66 @@ public class Main {
 
                     break;
                 case "3":
-                    // Check Adoption Application
+                    // Check Adoption Application Receipt
+                    String returnToMenuSelection2;
 
+                    System.out.println("To show you your application receipt, we will need your name.");
+
+                    do {
+                        String userName = getApplicationData("\nPlease input your name: ", INPUT_TYPE_DUPLICABLE_NAME);
+
+                        User currentUser = getUserData(userName);
+
+                        if (currentUser != null) {
+
+                            // Print user profile and pet adoption application(s)
+                            ApplicationReceipt applicationReceipt = getApplicationReceiptData(userName.strip().toLowerCase());
+                            printApplicationReceipt(applicationReceipt);
+
+                            // Return user to main menu when they press 0
+                            do {
+                                System.out.print("\nType 0 when you're ready to return to the main menu: ");
+                                returnToMenuSelection2 = keyboard.nextLine().strip();
+
+                                if (returnToMenuSelection2.equals("0")) {
+                                    break;
+                                }
+
+                                System.out.println("Invalid input! Please try again!");
+
+                            } while (true);
+
+                            System.out.println("\nYou will now return to the main menu...");
+                            Thread.sleep(800);
+                            break;
+
+                        } else {
+                            System.out.println("\nUnfortunately, a user with the inputted name doesn't exist.");
+                            System.out.println("\nIf you would like to try another name, input 1");
+                            System.out.println("If you would like to return to the main menu, input 2.");
+
+                            String userSelection;
+
+                            do {
+                                System.out.print("\nPlease input your selection: ");
+
+                                userSelection = keyboard.nextLine();
+
+                                if (userSelection.equals("1")) {
+                                    break;
+                                } else if (userSelection.equals("2")) {
+                                    break;
+                                } else {
+                                    System.out.println("Invalid input! Please try again!");
+                                }
+                            } while (true);
+
+                            // Return to main menu if user selects 2
+                            if (userSelection.equals("2")) {
+                                break;
+                            }
+                        }
+                    } while (true);
 
                     break;
                 case "4":
@@ -131,7 +217,7 @@ public class Main {
                                     "the pet so that we can input it into our system.");
 
                     // Prompt staff to input the pet's data
-                    currentPet.setName(getApplicationData("\nPlease input the pet's name: ", INPUT_TYPE_NAME));
+                    currentPet.setName(getApplicationData("\nPlease input the pet's name: ", INPUT_TYPE_NOT_DUPLICABLE_NAME));
                     currentPet.setAge(getApplicationData("\nPlease input the pet's age: ", INPUT_TYPE_AGE));
 
                     String petTypeInput =
@@ -160,6 +246,46 @@ public class Main {
     }
 
     /**
+     * This method uses the receiptDataMap to prints out a formatted adoption
+     * application receipt with the user's name and pet(s)
+     *
+     * @param applicationReceipt This is used to get data that should be included in the receipt.
+     */
+    public static void printApplicationReceipt(ApplicationReceipt applicationReceipt) {
+
+        Map<User, List<Pet>> receiptMap = applicationReceipt.getReceiptMap();
+
+        // Get the user and list of their pets
+        User user = applicationReceipt.getUser();
+        List<Pet> pets = receiptMap.get(applicationReceipt.getUser());
+
+        System.out.println("\nAdoption Application Receipt for " + user.getName() + "");
+
+        System.out.println("\nUser Information");
+        System.out.println("Name: " + user.getName());
+        System.out.println("Email: " + user.getEmail());
+        System.out.println("Age: " + user.getAge());
+
+        System.out.println("\nPet Adoption Requests Submitted for Review");
+
+        // Check if the user had submitted an applications for any pets
+        if (pets.isEmpty()) {
+            System.out.println("We have not received an adoption application from you.");
+            System.out.println("Please contact a staff member if you believe there has been a processing error.");
+        } else {
+            // Print profile for every pet
+            int petCount = 1;
+            for (Pet pet : pets) {
+                System.out.println("Pet Adoption Request" + petCount++);
+                System.out.println("Pet Name: " + pet.getName());
+                System.out.println("Pet Age: " + pet.getAge());
+                System.out.println("Pet Type: " + pet.getType());
+            }
+        }
+
+    }
+
+    /**
      * This method prints out each pet's formatted profile by using data from the availablePets txt file
      */
     public static void printPetProfiles() {
@@ -173,16 +299,22 @@ public class Main {
 
             while (scanner.hasNextLine()) {
                 // Split each line into an array to retrieve each type of peta data
+                System.out.println();
+
                 String[] petData = scanner.nextLine().split(", ");
                 String name = petData[0];
                 int age = Integer.parseInt(petData[1]);
                 PetType type = PetType.valueOf(petData[2]);
 
                 System.out.println("Pet " + petCount++);
-                System.out.println("name: " + name);
-                System.out.println("age: " + age);
-                System.out.println("type: " + type.name().toLowerCase());
-                System.out.println();
+                System.out.println("Name: " + name);
+                System.out.println("Age: " + age);
+                System.out.println("Type: " + type);
+            }
+
+            if (petCount == 1) {
+                System.out.println("We do not have any animals currently in our system.");
+                System.out.println("Please contact a staff member for more information.");
             }
 
             scanner.close();
@@ -190,8 +322,8 @@ public class Main {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
     }
+
 
     /**
      * This method saves the user and pet's data to the progress file.
@@ -206,18 +338,8 @@ public class Main {
             PrintWriter printWriter = new PrintWriter(fw);
 
             // Append the user and pet data to the txt file
-            printWriter.print(user.getName());
-            printWriter.print(", ");
-            printWriter.print(user.getEmail());
-            printWriter.print(", ");
-            printWriter.print(user.getAge());
-            printWriter.print(", ");
-            printWriter.print(pet.getName());
-            printWriter.print(", ");
-            printWriter.print(pet.getAge());
-            printWriter.print(", ");
-            printWriter.print(pet.getType());
-            printWriter.println(); // Add line break
+            printWriter.println(user.getName() + ", " + user.getEmail() + ", " + user.getAge()
+                    + pet.getName() + ", " + pet.getAge() + ", " + pet.getType().name());
 
             // Close the file
             printWriter.close();
@@ -249,7 +371,45 @@ public class Main {
             // Print the stack trace if there is an IOException
             e.printStackTrace();
         }
+    }
 
+    /**
+     * This method saves the pet's data to the availablePets txt file
+     *
+     * @param petName The name of the pet whose data should be removed.
+     */
+    public static void removePetFromAvailablePets(String petName) {
+
+        try {
+            // Read the pet data from the file and each pet to the ArrayList
+            List<Pet> pets = new ArrayList<>();
+            Scanner scanner = new Scanner(new File(AVAILABLE_PETS_FILE));
+
+            while (scanner.hasNextLine()) {
+                String[] petData = scanner.nextLine().split(", ");
+
+                Pet currentPet = new Pet();
+                currentPet.setName(petData[0]);
+                currentPet.setAge(petData[1]);
+                currentPet.setType(PetType.valueOf(petData[2]));
+                pets.add(currentPet);
+            }
+            scanner.close();
+
+            // Remove the Pet object with the petName
+            pets.removeIf(pet -> pet.getName().equalsIgnoreCase(petName));
+
+            // Write the remaining Pet data in the ArrayList back to the file
+            FileWriter fw = new FileWriter(AVAILABLE_PETS_FILE);
+            PrintWriter printWriter = new PrintWriter(fw);
+            for (Pet pet : pets) {
+                printWriter.println(pet.getName() + ", " + pet.getAge() + ", " + pet.getType().name());
+            }
+            printWriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -261,20 +421,20 @@ public class Main {
     public static Pet getPetData(String petName) {
 
         try {
-            File file = new File("pets.txt");
+            File file = new File(AVAILABLE_PETS_FILE);
             Scanner scanner = new Scanner(file);
 
             // Loop through the file line by line
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                String[] parts = line.split(", ");
+                String[] petData = line.split(", ");
 
                 // Check if the pet name matches
-                if (parts[0].equals(petName)) {
+                if (petData[0].equals(petName)) {
                     Pet pet = new Pet();
-                    pet.setName(parts[0]);
-                    pet.setAge(parts[1]);
-                    pet.setType(PetType.valueOf(parts[2]));
+                    pet.setName(petData[0]);
+                    pet.setAge(petData[1]);
+                    pet.setType(PetType.valueOf(petData[2]));
 
                     scanner.close();
                     return pet;
@@ -287,6 +447,95 @@ public class Main {
         }
 
         return null;
+    }
+
+    /**
+     * This method returns a User object based on the user's name by reading from the applicationData txt file.
+     *
+     * @param userName The name of the user whose data should be returned.
+     * @return Returns a User object based on the user's name if the user exists, and returns null if it doesn't.
+     */
+    public static User getUserData(String userName) {
+
+        try {
+            File file = new File(APPLICATION_DATA_FILE);
+            Scanner scanner = new Scanner(file);
+
+            // Loop through the file line by line
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] userData = line.split(", ");
+
+                // Check if the pet name matches
+                if (userData[0].equals(userName)) {
+                    User user = new User();
+                    user.setName(userData[0]);
+                    user.setEmail(userData[1]);
+                    user.setAge(userData[2]);
+
+                    scanner.close();
+                    return user;
+                }
+            }
+            scanner.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * This method returns the user's profile and pets they have
+     * submitted applications for by reading from the applicationData txt file.
+     *
+     * @param userName The name of the user whose data should be returned.
+     * @return Returns an ApplicationReceipt object receipt that holds data for the application receipt.
+     */
+    public static ApplicationReceipt getApplicationReceiptData(String userName) {
+
+        Map<User, List<Pet>> receiptDataMap = new HashMap<>();
+        User user = new User();
+        List<Pet> pets = new ArrayList<>();
+
+
+        try {
+            File file = new File(APPLICATION_DATA_FILE);
+            Scanner scanner = new Scanner(file);
+
+            // Loop through the file line by line
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] applicationData = line.split(", ");
+
+                // Check if the user's name matches
+                if (applicationData[0].equals(userName)) {
+                    // Set the data
+                    user.setName(applicationData[0]);
+                    user.setEmail(applicationData[1]);
+                    user.setAge(applicationData[2]);
+
+                    Pet pet = new Pet();
+                    pet.setName(applicationData[3]);
+                    pet.setAge(applicationData[4]);
+                    pet.setType(PetType.valueOf(applicationData[5]));
+                    pets.add(pet);
+                }
+            }
+
+            scanner.close();
+
+            // Add the User and Pet objects to the map
+            receiptDataMap.put(user, pets);
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return new ApplicationReceipt(user, receiptDataMap);
+
     }
 
     /**
@@ -315,8 +564,14 @@ public class Main {
 
             if (userInput.equals("")) {
                 System.out.println("Invalid input! Please try again and ensure that your input is not empty.");
-            } else if (inputType == INPUT_TYPE_NAME) {
+            } else if (inputType == INPUT_TYPE_DUPLICABLE_NAME) {
                 return userInput;
+            } else if (inputType == INPUT_TYPE_NOT_DUPLICABLE_NAME) {
+                if (getPetData(userInput) == null) {
+                    return userInput;
+                } else {
+                    System.out.println("Sorry, this pet name is taken. Please try another one!");
+                }
             } else if (inputType == INPUT_TYPE_AGE) {
                 // Check if it is an int
                 try {
